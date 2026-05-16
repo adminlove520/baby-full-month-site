@@ -8,12 +8,15 @@ export default function CherryBlossom() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let animationFrameId: number;
     const petals: Petal[] = [];
-    const petalCount = 60; // Increased density
+    const petalCount = 40; // Reduced density for performance
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     class Petal {
       x: number;
@@ -29,26 +32,26 @@ export default function CherryBlossom() {
       rotateSpeed: number;
 
       constructor() {
-        this.x = Math.random() * (canvas?.width || 0);
-        this.y = Math.random() * (canvas?.height || 0) - (canvas?.height || 0);
-        this.w = 12 + Math.random() * 18;
-        this.h = 10 + Math.random() * 12;
+        this.x = Math.random() * width;
+        this.y = Math.random() * height - height;
+        this.w = 12 + Math.random() * 12;
+        this.h = 10 + Math.random() * 10;
         this.opacity = 0.4 + Math.random() * 0.4;
         this.flip = Math.random();
-        this.xSpeed = 0.5 + Math.random() * 1.5;
-        this.ySpeed = 1 + Math.random() * 1.5;
-        this.flipSpeed = 0.01 + Math.random() * 0.03;
+        this.xSpeed = 0.5 + Math.random() * 1.2;
+        this.ySpeed = 1 + Math.random() * 1.2;
+        this.flipSpeed = 0.01 + Math.random() * 0.02;
         this.rotate = Math.random() * Math.PI;
-        this.rotateSpeed = (Math.random() - 0.5) * 0.02;
+        this.rotateSpeed = (Math.random() - 0.5) * 0.01;
       }
 
       draw() {
         if (!ctx || !canvas) return;
-        if (this.y > canvas.height || this.x > canvas.width || this.x < -this.w) {
-          this.x = Math.random() * canvas.width;
+        if (this.y > height || this.x > width || this.x < -this.w) {
+          this.x = Math.random() * width;
           this.y = -20;
-          this.xSpeed = 0.5 + Math.random() * 1.5;
-          this.ySpeed = 1 + Math.random() * 1.5;
+          this.xSpeed = 0.5 + Math.random() * 1.2;
+          this.ySpeed = 1 + Math.random() * 1.2;
         }
 
         ctx.save();
@@ -56,16 +59,12 @@ export default function CherryBlossom() {
         ctx.rotate(this.rotate + (this.flip * Math.PI) / 4);
         
         ctx.beginPath();
-        const fillGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w);
-        fillGradient.addColorStop(0, `rgba(255, 192, 203, ${this.opacity})`);
-        fillGradient.addColorStop(1, `rgba(255, 182, 193, ${this.opacity * 0.5})`);
+        // Optimization: Pre-calculating opacity string
+        ctx.fillStyle = `rgba(255, 192, 203, ${this.opacity})`;
         
-        ctx.fillStyle = fillGradient;
-        
-        // Draw a heart-like petal shape
+        // Simplified petal shape for performance (avoiding complex bezier if possible)
         ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-this.w/2, -this.h/2, -this.w, this.h/3, 0, this.h);
-        ctx.bezierCurveTo(this.w, this.h/3, this.w/2, -this.h/2, 0, 0);
+        ctx.arc(0, this.h / 2, this.w / 2, 0, Math.PI * 2);
         
         ctx.fill();
         ctx.restore();
@@ -81,8 +80,10 @@ export default function CherryBlossom() {
     }
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     };
 
     const init = () => {
@@ -94,7 +95,7 @@ export default function CherryBlossom() {
 
     const animate = () => {
       if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, width, height);
       petals.forEach((petal) => petal.update());
       animationFrameId = requestAnimationFrame(animate);
     };

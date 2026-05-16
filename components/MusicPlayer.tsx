@@ -110,13 +110,33 @@ export default function MusicPlayer() {
   const handleAddUrl = () => {
     if (!musicUrl) return;
     if (!musicUrl.startsWith('http')) {
-      alert('请输入有效的 MP3 URL（以 http 或 https 开头）');
+      alert('请输入有效的音乐分享链接（网易云/QQ音乐）或 MP3 URL');
       return;
     }
     
+    let finalUrl = musicUrl;
+    let trackName = musicUrl.split('/').pop()?.split('?')[0] || '远程音乐';
+
+    // 1. 网易云音乐解析
+    const neteaseMatch = musicUrl.match(/(?:music\.163\.com|y\.music\.163\.com)\/.*id=(\d+)/);
+    if (neteaseMatch) {
+      const id = neteaseMatch[1];
+      finalUrl = `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
+      trackName = `网易云音乐 - ${id}`;
+    }
+
+    // 2. QQ 音乐解析 (部分链接支持)
+    const qqMatch = musicUrl.match(/y\.qq\.com\/n\/ryqq\/songDetail\/([a-zA-Z0-9]+)/);
+    if (qqMatch) {
+      const mid = qqMatch[1];
+      // 注意：QQ音乐直链通常有时效性或需要特殊参数，这里使用一个通用的解析接口作为尝试
+      finalUrl = `https://api.uomg.com/api/rand.music?mid=${mid}&format=mp3`;
+      trackName = `QQ音乐 - ${mid}`;
+    }
+    
     const newTrack: MusicFile = {
-      name: musicUrl.split('/').pop()?.split('?')[0] || '远程音乐',
-      download_url: musicUrl,
+      name: trackName,
+      download_url: finalUrl,
       type: 'remote'
     };
     

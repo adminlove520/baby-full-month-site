@@ -8,12 +8,16 @@ export default function MeteorShower() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let animationFrameId: number;
     const stars: Star[] = [];
     const meteors: Meteor[] = [];
+
+    // Performance Optimization: Cache dimensions
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     class Star {
       x: number;
@@ -23,22 +27,21 @@ export default function MeteorShower() {
       speed: number;
 
       constructor() {
-        this.x = Math.random() * (canvas?.width || 0);
-        this.y = Math.random() * (canvas?.height || 0);
-        this.size = Math.random() * 2;
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 1.5;
         this.opacity = Math.random();
         this.speed = 0.005 + Math.random() * 0.01;
       }
 
       draw() {
         if (!ctx) return;
+        // Optimization: Removed shadowBlur (extremely expensive)
+        // Using simple fillStyle instead
         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        ctx.shadowBlur = this.size * 2;
-        ctx.shadowColor = "white";
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
 
       update() {
@@ -61,11 +64,11 @@ export default function MeteorShower() {
       }
 
       init() {
-        this.x = Math.random() * (canvas?.width || 0) + 200;
+        this.x = Math.random() * width + 200;
         this.y = -Math.random() * 300;
         this.len = Math.random() * 150 + 80;
-        this.speed = Math.random() * 15 + 8;
-        this.size = Math.random() * 2 + 0.5;
+        this.speed = Math.random() * 12 + 6; // Optimized speed
+        this.size = Math.random() * 1.5 + 0.5;
         this.opacity = 1;
       }
 
@@ -74,14 +77,12 @@ export default function MeteorShower() {
         ctx.save();
         const gradient = ctx.createLinearGradient(this.x, this.y, this.x - this.len, this.y + this.len);
         gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
-        gradient.addColorStop(0.1, `rgba(255, 200, 255, ${this.opacity * 0.8})`);
+        gradient.addColorStop(0.1, `rgba(255, 210, 255, ${this.opacity * 0.7})`);
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
         
         ctx.strokeStyle = gradient;
         ctx.lineWidth = this.size;
         ctx.lineCap = 'round';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "rgba(255, 200, 255, 0.5)";
         
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
@@ -93,7 +94,7 @@ export default function MeteorShower() {
       update() {
         this.x -= this.speed;
         this.y += this.speed;
-        if (this.y > (canvas?.height || 0) + 200 || this.x < -200) {
+        if (this.y > height + 200 || this.x < -200) {
           this.init();
         }
         this.draw();
@@ -101,21 +102,24 @@ export default function MeteorShower() {
     }
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     };
 
     const init = () => {
       resize();
       stars.length = 0;
       meteors.length = 0;
-      for (let i = 0; i < 120; i++) stars.push(new Star());
-      for (let i = 0; i < 6; i++) meteors.push(new Meteor());
+      // Reduced counts for performance
+      for (let i = 0; i < 80; i++) stars.push(new Star());
+      for (let i = 0; i < 4; i++) meteors.push(new Meteor());
     };
 
     const animate = () => {
       if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, width, height);
       stars.forEach(s => s.update());
       meteors.forEach(m => m.update());
       animationFrameId = requestAnimationFrame(animate);
