@@ -3,6 +3,9 @@ import { Ma_Shan_Zheng, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import MusicPlayer from "@/components/MusicPlayer";
+import CherryBlossom from "@/components/CherryBlossom";
+import MeteorShower from "@/components/MeteorShower";
+import FloatingParticles from "@/components/FloatingParticles";
 
 const maShanZheng = Ma_Shan_Zheng({
   weight: "400",
@@ -28,6 +31,9 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body className={`${notoSc.variable} ${maShanZheng.variable} font-sans antialiased bg-baby-pink`}>
+        <CherryBlossom />
+        <MeteorShower />
+        <FloatingParticles />
         <Navbar />
         <MusicPlayer />
         {children}

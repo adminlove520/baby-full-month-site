@@ -1,17 +1,14 @@
 import { getPhotos } from '@/lib/github';
-import CherryBlossom from '@/components/CherryBlossom';
-import MeteorShower from '@/components/MeteorShower';
 import GallerySection from '@/components/GallerySection';
 
 export default async function GalleryPage() {
   const photos = await getPhotos();
 
   return (
-    <main className="relative min-h-screen pt-24 pb-12 px-4 bg-baby-blue/30">
-      <CherryBlossom />
-      <MeteorShower />
-      
-      <GallerySection photos={photos} />
+    <main className="relative min-h-screen pt-24 pb-12 px-4 bg-baby-blue/10">
+      <div className="relative z-10">
+        <GallerySection photos={photos} />
+      </div>
       
       {photos.length === 0 && (
         <div className="text-center p-20 bg-white/40 backdrop-blur-md rounded-3xl border border-blue-100 max-w-2xl mx-auto relative z-10">

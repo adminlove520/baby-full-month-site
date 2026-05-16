@@ -1,6 +1,3 @@
-import CherryBlossom from '@/components/CherryBlossom';
-import MeteorShower from '@/components/MeteorShower';
-import FloatingParticles from '@/components/FloatingParticles';
 import GrowthClock from '@/components/GrowthClock';
 import GallerySection from '@/components/GallerySection';
 import ScrollButton from '@/components/ScrollButton';
@@ -10,13 +7,9 @@ export default async function Home() {
   const photos = await getPhotos();
 
   return (
-    <div className="bg-baby-pink">
+    <div className="bg-transparent">
       {/* Hero Section */}
       <main className="relative h-screen flex flex-col items-center justify-center p-8 overflow-hidden">
-        <CherryBlossom />
-        <MeteorShower />
-        <FloatingParticles />
-        
         <div className="z-10 text-center space-y-8 max-w-2xl">
           <h1 className="text-6xl md:text-8xl font-fancy text-pink-500 drop-shadow-md">
             景皓满月啦
