@@ -30,17 +30,28 @@ RUSTUP_UPDATE_ROOT="https://mirrors.ustc.edu.cn/rust-static/rustup"
 MIRROR_SCRIPT_URL="https://gitee.com/SuperManito/LinuxMirrors/raw/main/ChangeMirrors.sh"
 
 # ==============================================
-# 操作系统检测
+# 操作系统及架构检测
 # ==============================================
 OS_TYPE="unknown"
+ARCH_TYPE=$(uname -m)
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         OS_TYPE=$ID
     fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    OS_TYPE="macos"
 elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
     OS_TYPE="windows"
 fi
+
+# 转换 Go 架构名称
+case "${ARCH_TYPE}" in
+    x86_64)  GO_ARCH="amd64" ;;
+    aarch64|arm64) GO_ARCH="arm64" ;;
+    armv7l)  GO_ARCH="armv6l" ;;
+    *)       GO_ARCH="amd64" ;;
+esac
 
 # ==============================================
 # 终端颜色设置
@@ -209,6 +220,10 @@ EOF
 
 install_linux_docker() {
     [ "$INSTALL_DOCKER" = false ] && return 0
+    if [[ "$OS_TYPE" == "macos" ]]; then
+        info "macOS 请手动安装 Docker Desktop: https://www.docker.com/products/docker-desktop/"
+        return 0
+    fi
     progress "安装 Docker"
     if [[ "$OS_TYPE" == "centos" || "$OS_TYPE" == "rocky" ]]; then
         yum install -y yum-utils
@@ -246,8 +261,17 @@ install_linux_docker() {
 install_linux_java() {
     [ "$INSTALL_JAVA" = false ] && return 0
     progress "安装 Java 1.8"
-    [[ "$OS_TYPE" == "centos" ]] && yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel
-    [[ "$OS_TYPE" == "ubuntu" ]] && apt-get install -y openjdk-8-jdk
+    if [[ "$OS_TYPE" == "macos" ]]; then
+        if command_exists brew; then
+            brew install --cask adoptopenjdk8
+        else
+            warning "macOS 请先安装 Homebrew 以自动安装 Java"
+        fi
+    elif [[ "$OS_TYPE" == "centos" ]]; then
+        yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel
+    elif [[ "$OS_TYPE" == "ubuntu" || "$OS_TYPE" == "debian" ]]; then
+        apt-get install -y openjdk-8-jdk
+    fi
 }
 
 install_linux_nvm() {
@@ -264,17 +288,31 @@ install_linux_nvm() {
 
 install_linux_go() {
     [ "$INSTALL_GO" = false ] && return 0
-    progress "安装 Go"
-    local go_tar="go${GO_VERSION}.linux-amd64.tar.gz"
+    
+    local go_os="linux"
+    [ "$OS_TYPE" == "macos" ] && go_os="darwin"
+    
+    progress "安装 Go (${go_os}-${GO_ARCH})"
+    local go_tar="go${GO_VERSION}.${go_os}-${GO_ARCH}.tar.gz"
     local download_url="https://golang.org/dl/${go_tar}"
     [ "$USE_MIRROR" = true ] && download_url="${GO_MIRROR}/${go_tar}"
+    
     wget -P "$TEMP_DIR" "$download_url"
-    rm -rf /usr/local/go && tar -C /usr/local -xzf "${TEMP_DIR}/${go_tar}"
-    if ! grep -q "GOROOT" /etc/profile; then
-        echo "export GOROOT=/usr/local/go" >> /etc/profile
-        echo "export GOPATH=\$HOME/go" >> /etc/profile
-        echo "export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin" >> /etc/profile
-        [ "$USE_MIRROR" = true ] && echo "export GOPROXY=${GOPROXY}" >> /etc/profile
+    
+    if [ "$OS_TYPE" == "macos" ]; then
+        sudo tar -C /usr/local -xzf "${TEMP_DIR}/${go_tar}"
+    else
+        rm -rf /usr/local/go && tar -C /usr/local -xzf "${TEMP_DIR}/${go_tar}"
+    fi
+    
+    if ! grep -q "GOROOT" /etc/profile 2>/dev/null || ! grep -q "GOROOT" ~/.bash_profile 2>/dev/null; then
+        local shell_profile="/etc/profile"
+        [ "$OS_TYPE" == "macos" ] && shell_profile="$HOME/.bash_profile"
+        
+        echo "export GOROOT=/usr/local/go" >> "$shell_profile"
+        echo "export GOPATH=\$HOME/go" >> "$shell_profile"
+        echo "export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin" >> "$shell_profile"
+        [ "$USE_MIRROR" = true ] && echo "export GOPROXY=${GOPROXY}" >> "$shell_profile"
     fi
 }
 

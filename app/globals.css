@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FDF2F8;
+  --foreground: #4B5563;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.font-fancy {
+  font-family: var(--font-ma-shan-zheng), cursive;
+}

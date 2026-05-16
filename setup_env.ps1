@@ -15,12 +15,25 @@ function Write-Warning ($Message) { Write-Host "WARNING: $Message" -ForegroundCo
 function Write-Error ($Message) { Write-Host "ERROR: $Message" -ForegroundColor Red }
 
 # ==============================================
-# 前置检查: 管理员权限
+# 前置检查: 管理员权限及架构检测
 # ==============================================
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Error "请以管理员权限运行此 PowerShell 脚本。"
     exit 1
+}
+
+# 更加健壮的架构检测方式
+$RuntimeArch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture
+$ProcessorArch = $env:PROCESSOR_ARCHITECTURE
+$IsArm = ($RuntimeArch -eq "Arm64") -or ($ProcessorArch -eq "ARM64")
+
+$RustArch = "x86_64-pc-windows-msvc"
+if ($IsArm) {
+    $RustArch = "aarch64-pc-windows-msvc"
+    Write-Warning "检测到 ARM64 架构，将使用 ARM 专用组件。"
+} else {
+    Write-Host "检测到 x86_64/AMD64 架构。"
 }
 
 # ==============================================
@@ -96,7 +109,15 @@ foreach ($choice in $choices) {
             }
         }
         "2" { Install-App "Docker Desktop" "docker" "Docker.DockerDesktop" }
-        "3" { Install-App "Java 1.8" "openjdk8" "Oracle.JavaRuntimeEnvironment" } # Winget ID 可能随版本变化
+        "3" { 
+            # 对于 ARM64 Windows，建议使用支持 ARM 的 Java 分发版
+            if ($IsArm) {
+                Write-Warning "ARM64 Windows 建议使用 Microsoft 或 Azul Zulu 提供的原生 JDK 1.8。"
+                Install-App "Java 1.8 (ARM64)" "zulu8" "Azul.Zulu.8.JDK"
+            } else {
+                Install-App "Java 1.8" "openjdk8" "Oracle.JavaRuntimeEnvironment"
+            }
+        }
         "4" { 
             Install-App "NVM" "nvm" "CoreyButler.NVMforWindows"
             if ($useMirror) {
@@ -113,14 +134,14 @@ foreach ($choice in $choices) {
             }
         }
         "6" { 
-            Write-Title "正在安装 Rust"
+            Write-Title "正在安装 Rust ($ProcessorArch)"
             # Rust 通常使用 rustup
             if ($useMirror) {
                 $env:RUSTUP_DIST_SERVER = "https://mirrors.ustc.edu.cn/rust-static"
                 $env:RUSTUP_UPDATE_ROOT = "https://mirrors.ustc.edu.cn/rust-static/rustup"
             }
             $rustInstall = "$env:TEMP\rustup-init.exe"
-            Invoke-WebRequest -Uri "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe" -OutFile $rustInstall
+            Invoke-WebRequest -Uri "https://static.rust-lang.org/rustup/dist/$RustArch/rustup-init.exe" -OutFile $rustInstall
             & $rustInstall -y --no-modify-path
             Remove-Item $rustInstall
         }
