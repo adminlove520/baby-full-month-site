@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Ma_Shan_Zheng, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import MusicPlayer from "@/components/MusicPlayer";
 
 const maShanZheng = Ma_Shan_Zheng({
   weight: "400",
@@ -31,10 +32,6 @@ export default function RootLayout({
         <MusicPlayer />
         {children}
       </body>
-    </html>
-  );
-}
- </body>
     </html>
   );
 }

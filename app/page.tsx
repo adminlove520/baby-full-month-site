@@ -15,6 +15,8 @@ export default function Home() {
           景皓满月啦
         </h1>
         
+        <GrowthClock />
+        
         <p className="text-xl md:text-2xl text-baby-text leading-relaxed">
           亲爱的小景皓，欢迎来到这个色彩斑斓的世界。<br/>
           愿你眼里有星辰，心中有山海，<br/>
