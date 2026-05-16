@@ -25,22 +25,25 @@ export default function MeteorShower() {
       constructor() {
         this.x = Math.random() * (canvas?.width || 0);
         this.y = Math.random() * (canvas?.height || 0);
-        this.size = Math.random() * 1.5;
+        this.size = Math.random() * 2;
         this.opacity = Math.random();
-        this.speed = 0.01 + Math.random() * 0.02;
+        this.speed = 0.005 + Math.random() * 0.01;
       }
 
       draw() {
         if (!ctx) return;
         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.shadowBlur = this.size * 2;
+        ctx.shadowColor = "white";
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
 
       update() {
         this.opacity += this.speed;
-        if (this.opacity > 1 || this.opacity < 0) this.speed = -this.speed;
+        if (this.opacity > 1 || this.opacity < 0.2) this.speed = -this.speed;
         this.draw();
       }
     }
@@ -51,36 +54,46 @@ export default function MeteorShower() {
       len!: number;
       speed!: number;
       size!: number;
+      opacity!: number;
 
       constructor() {
         this.init();
       }
 
       init() {
-        this.x = Math.random() * (canvas?.width || 0);
-        this.y = -Math.random() * 200;
-        this.len = Math.random() * 80 + 50;
-        this.speed = Math.random() * 10 + 5;
-        this.size = Math.random() * 1.5 + 0.5;
+        this.x = Math.random() * (canvas?.width || 0) + 200;
+        this.y = -Math.random() * 300;
+        this.len = Math.random() * 150 + 80;
+        this.speed = Math.random() * 15 + 8;
+        this.size = Math.random() * 2 + 0.5;
+        this.opacity = 1;
       }
 
       draw() {
         if (!ctx) return;
+        ctx.save();
         const gradient = ctx.createLinearGradient(this.x, this.y, this.x - this.len, this.y + this.len);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+        gradient.addColorStop(0.1, `rgba(255, 200, 255, ${this.opacity * 0.8})`);
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
         ctx.strokeStyle = gradient;
         ctx.lineWidth = this.size;
+        ctx.lineCap = 'round';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "rgba(255, 200, 255, 0.5)";
+        
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(this.x - this.len, this.y + this.len);
         ctx.stroke();
+        ctx.restore();
       }
 
       update() {
         this.x -= this.speed;
         this.y += this.speed;
-        if (this.y > (canvas?.height || 0) + 100 || this.x < -100) {
+        if (this.y > (canvas?.height || 0) + 200 || this.x < -200) {
           this.init();
         }
         this.draw();
@@ -94,8 +107,10 @@ export default function MeteorShower() {
 
     const init = () => {
       resize();
-      for (let i = 0; i < 100; i++) stars.push(new Star());
-      for (let i = 0; i < 8; i++) meteors.push(new Meteor());
+      stars.length = 0;
+      meteors.length = 0;
+      for (let i = 0; i < 120; i++) stars.push(new Star());
+      for (let i = 0; i < 6; i++) meteors.push(new Meteor());
     };
 
     const animate = () => {

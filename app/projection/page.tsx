@@ -17,6 +17,44 @@ export default function Projection() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const [direction, setDirection] = useState(0);
+
+  const variants = {
+    initial: (direction: number) => ({
+      opacity: 0,
+      scale: 1.2,
+      x: direction > 0 ? 1500 : direction < 0 ? -1500 : 0,
+      rotate: direction > 0 ? 10 : -10,
+      filter: "blur(20px)",
+    }),
+    animate: {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      rotate: 0,
+      filter: "blur(0px)",
+      transition: {
+        x: { type: "spring", stiffness: 200, damping: 25 },
+        opacity: { duration: 1 },
+        scale: { duration: 1.5, ease: "easeOut" },
+        rotate: { type: "spring", stiffness: 100, damping: 20 },
+        filter: { duration: 0.8 }
+      }
+    },
+    exit: (direction: number) => ({
+      opacity: 0,
+      scale: 0.8,
+      x: direction < 0 ? 1500 : direction > 0 ? -1500 : 0,
+      rotate: direction < 0 ? 10 : -10,
+      filter: "blur(20px)",
+      transition: {
+        x: { type: "spring", stiffness: 200, damping: 25 },
+        opacity: { duration: 0.8 },
+        scale: { duration: 1 }
+      }
+    })
+  };
+
   useEffect(() => {
     async function load() {
       try {
@@ -36,11 +74,17 @@ export default function Projection() {
     let timer: NodeJS.Timeout;
     if (isPlaying && photos.length > 0) {
       timer = setInterval(() => {
+        setDirection(1);
         setCurrentIndex((prev) => (prev + 1) % photos.length);
       }, 5000);
     }
     return () => clearInterval(timer);
   }, [isPlaying, photos]);
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    setCurrentIndex((prev) => (prev + newDirection + photos.length) % photos.length);
+  };
 
   const handleClose = () => {
     if (document.fullscreenElement) {
@@ -54,23 +98,29 @@ export default function Projection() {
 
   return (
     <div className="fixed inset-0 bg-black z-[100] flex items-center justify-center overflow-hidden group">
-      <AnimatePresence mode="wait">
+      <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, scale: 1.2, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0.9, x: -20 }}
-          transition={{ duration: 2, ease: "easeInOut" }}
+          custom={direction}
+          variants={variants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
           className="absolute inset-0 flex items-center justify-center"
         >
           <img
             src={photos[currentIndex].download_url}
             alt={photos[currentIndex].name}
-            className="max-h-full max-w-full object-contain"
+            className="max-h-full max-w-full object-contain shadow-[0_0_50px_rgba(244,114,182,0.2)]"
           />
-          <div className="absolute bottom-16 left-0 right-0 text-center text-white/60 font-fancy text-3xl drop-shadow-[0_0_10px_rgba(0,0,0,0.8)]">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="absolute bottom-16 left-0 right-0 text-center text-white/70 font-fancy text-4xl drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] tracking-widest"
+          >
             {photos[currentIndex].name.split('.')[0]}
-          </div>
+          </motion.div>
         </motion.div>
       </AnimatePresence>
 
@@ -83,13 +133,13 @@ export default function Projection() {
       </button>
 
       <div className="absolute top-1/2 left-6 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length)} className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all">
+        <button onClick={() => paginate(-1)} className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all">
           <ChevronLeft size={40} />
         </button>
       </div>
 
       <div className="absolute top-1/2 right-6 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => setCurrentIndex((prev) => (prev + 1) % photos.length)} className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all">
+        <button onClick={() => paginate(1)} className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all">
           <ChevronRight size={40} />
         </button>
       </div>

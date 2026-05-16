@@ -75,6 +75,11 @@ export default function MusicPlayer() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 4.5 * 1024 * 1024) {
+      alert('文件太大（超过 4.5MB），受 Vercel 限制无法直接上传。请手动上传到 GitHub 仓库的 Music 文件夹，或使用较小的 MP3 文件。');
+      return;
+    }
+
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -85,19 +90,32 @@ export default function MusicPlayer() {
         body: formData,
       });
       if (res.ok) {
+        alert('上传成功！音乐正在同步中，请刷新页面查看。');
         fetchPlaylist();
+      } else if (res.status === 413) {
+        alert('上传失败：文件太大（413 Payload Too Large）。受 Vercel 限制，上传文件不能超过 4.5MB。');
+      } else {
+        const errData = await res.json();
+        alert(`上传失败: ${errData.error || '未知错误'}`);
       }
     } catch (err) {
-      alert('上传失败');
+      console.error(err);
+      alert('上传过程中发生网络错误');
     } finally {
       setUploading(false);
     }
   };
 
+
   const handleAddUrl = () => {
     if (!musicUrl) return;
+    if (!musicUrl.startsWith('http')) {
+      alert('请输入有效的 MP3 URL（以 http 或 https 开头）');
+      return;
+    }
+    
     const newTrack: MusicFile = {
-      name: musicUrl.split('/').pop() || '远程音乐',
+      name: musicUrl.split('/').pop()?.split('?')[0] || '远程音乐',
       download_url: musicUrl,
       type: 'remote'
     };
