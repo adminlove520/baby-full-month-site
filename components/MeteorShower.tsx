@@ -23,18 +23,19 @@ export default function MeteorShower() {
       speed: number;
 
       constructor() {
-        this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * canvas!.height;
+        this.x = Math.random() * (canvas?.width || 0);
+        this.y = Math.random() * (canvas?.height || 0);
         this.size = Math.random() * 1.5;
         this.opacity = Math.random();
         this.speed = 0.01 + Math.random() * 0.02;
       }
 
       draw() {
-        ctx!.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fill();
+        if (!ctx) return;
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       update() {
@@ -45,18 +46,18 @@ export default function MeteorShower() {
     }
 
     class Meteor {
-      x: number;
-      y: number;
-      len: number;
-      speed: number;
-      size: number;
+      x!: number;
+      y!: number;
+      len!: number;
+      speed!: number;
+      size!: number;
 
       constructor() {
         this.init();
       }
 
       init() {
-        this.x = Math.random() * canvas!.width;
+        this.x = Math.random() * (canvas?.width || 0);
         this.y = -Math.random() * 200;
         this.len = Math.random() * 80 + 50;
         this.speed = Math.random() * 10 + 5;
@@ -64,21 +65,22 @@ export default function MeteorShower() {
       }
 
       draw() {
-        const gradient = ctx!.createLinearGradient(this.x, this.y, this.x - this.len, this.y + this.len);
+        if (!ctx) return;
+        const gradient = ctx.createLinearGradient(this.x, this.y, this.x - this.len, this.y + this.len);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx!.strokeStyle = gradient;
-        ctx!.lineWidth = this.size;
-        ctx!.beginPath();
-        ctx!.moveTo(this.x, this.y);
-        ctx!.lineTo(this.x - this.len, this.y + this.len);
-        ctx!.stroke();
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = this.size;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.len, this.y + this.len);
+        ctx.stroke();
       }
 
       update() {
         this.x -= this.speed;
         this.y += this.speed;
-        if (this.y > canvas!.height + 100 || this.x < -100) {
+        if (this.y > (canvas?.height || 0) + 100 || this.x < -100) {
           this.init();
         }
         this.draw();
@@ -97,6 +99,7 @@ export default function MeteorShower() {
     };
 
     const animate = () => {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       stars.forEach(s => s.update());
       meteors.forEach(m => m.update());

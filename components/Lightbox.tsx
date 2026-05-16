@@ -110,7 +110,7 @@ export default function Lightbox({ photos, initialIndex, onClose }: { photos: Ph
             onClick={(e) => { e.stopPropagation(); setIndex(i); setIsZoomed(false); }}
             className={`flex-shrink-0 w-12 h-12 rounded-lg border-2 overflow-hidden transition-all ${index === i ? 'border-pink-500 scale-110 shadow-lg' : 'border-white/20 opacity-40 hover:opacity-100'}`}
           >
-            <img src={p.download_url} className="w-full h-full object-cover" />
+            <img src={p.download_url} alt="" className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
