@@ -28,8 +28,13 @@ export default function RootLayout({
     <html lang="zh">
       <body className={`${notoSc.variable} ${maShanZheng.variable} font-sans antialiased bg-baby-pink`}>
         <Navbar />
+        <MusicPlayer />
         {children}
       </body>
+    </html>
+  );
+}
+ </body>
     </html>
   );
 }

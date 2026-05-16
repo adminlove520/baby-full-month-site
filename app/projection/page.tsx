@@ -48,10 +48,10 @@ export default function Projection() {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 1.2, x: 20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 0.9, x: -20 }}
+          transition={{ duration: 2, ease: "easeInOut" }}
           className="absolute inset-0 flex items-center justify-center"
         >
           <img

@@ -1,6 +1,7 @@
 import CherryBlossom from '@/components/CherryBlossom';
 import MeteorShower from '@/components/MeteorShower';
 import FloatingParticles from '@/components/FloatingParticles';
+import GrowthClock from '@/components/GrowthClock';
 
 export default function Home() {
   return (
