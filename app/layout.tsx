@@ -31,12 +31,16 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body className={`${notoSc.variable} ${maShanZheng.variable} font-sans antialiased bg-baby-pink`}>
-        <CherryBlossom />
-        <MeteorShower />
-        <FloatingParticles />
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <CherryBlossom />
+          <MeteorShower />
+          <FloatingParticles />
+        </div>
         <Navbar />
         <MusicPlayer />
-        {children}
+        <div className="relative z-10">
+          {children}
+        </div>
       </body>
     </html>
   );

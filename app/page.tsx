@@ -35,7 +35,7 @@ export default async function Home() {
       </main>
 
       {/* Gallery Section */}
-      <div id="gallery">
+      <div id="gallery" className="perspective-1000 relative z-10 bg-transparent">
         <GallerySection photos={photos} />
       </div>
       

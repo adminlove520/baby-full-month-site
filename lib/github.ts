@@ -5,6 +5,12 @@ export interface Photo {
   download_url: string;
 }
 
+export interface MusicFile {
+  name: string;
+  path: string;
+  download_url: string;
+}
+
 export async function getPhotos(dirPath: string = "Photos/张景皓"): Promise<Photo[]> {
   const token = process.env.GITHUB_TOKEN;
   const owner = "adminlove520";
@@ -39,7 +45,7 @@ export async function getPhotos(dirPath: string = "Photos/张景皓"): Promise<P
           name: item.name,
           path: item.path,
           url: item.html_url,
-          download_url: item.download_url,
+          download_url: `/api/proxy-image?path=${encodeURIComponent(item.path)}`,
         });
       }
     }
@@ -52,4 +58,62 @@ export async function getPhotos(dirPath: string = "Photos/张景皓"): Promise<P
     console.error("Error fetching photos:", error);
     return [];
   }
+}
+
+export async function getMusic(): Promise<MusicFile[]> {
+  const token = process.env.GITHUB_TOKEN;
+  const owner = "adminlove520";
+  const repo = "HaoPic";
+  const path = "Music";
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+        next: { revalidate: 60 },
+      }
+    );
+
+    if (!response.ok) return [];
+
+    const data = await response.json();
+    return data
+      .filter((item: any) => item.type === "file" && /\.(mp3|wav|ogg|m4a)$/i.test(item.name))
+      .map((item: any) => ({
+        name: item.name,
+        path: item.path,
+        download_url: item.download_url,
+      }));
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function uploadToGithub(fileName: string, contentBase64: string, folder: string = "Music") {
+  const token = process.env.GITHUB_TOKEN;
+  const owner = "adminlove520";
+  const repo = "HaoPic";
+  const path = `${folder}/${fileName}`;
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: `Upload ${fileName} via Baby Site`,
+        content: contentBase64,
+      }),
+    }
+  );
+
+  return response.ok;
 }

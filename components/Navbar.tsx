@@ -9,7 +9,7 @@ export default function Navbar() {
   
   const navItems = [
     { name: '首页', path: '/' },
-    { name: '相册墙', path: '/gallery' },
+    { name: '照片墙', path: '/gallery' },
     { name: '幻灯片', path: '/projection' },
   ];
 

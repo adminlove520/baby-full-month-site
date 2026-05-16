@@ -10,30 +10,30 @@ export default function MeteorShower() {
     const newMeteors = Array.from({ length: 15 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 50}%`,
-      delay: Math.random() * 10,
-      duration: Math.random() * 2 + 1,
+      top: `${Math.random() * 40}%`,
+      delay: Math.random() * 20,
+      duration: Math.random() * 3 + 2,
     }));
     setMeteors(newMeteors);
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <>
       {meteors.map((m) => (
         <motion.div
           key={m.id}
-          className="absolute h-[2px] w-[100px] bg-gradient-to-r from-transparent via-white to-transparent rotate-[-45deg]"
-          initial={{ x: '100%', y: '-100%', opacity: 0 }}
+          className="absolute h-[2px] w-[180px] bg-gradient-to-r from-transparent via-white/90 to-transparent rotate-[-45deg] blur-[1px]"
+          initial={{ x: '150%', y: '-150%', opacity: 0 }}
           animate={{
-            x: '-200%',
-            y: '200%',
-            opacity: [0, 1, 0],
+            x: '-400%',
+            y: '400%',
+            opacity: [0, 1, 1, 0],
           }}
           transition={{
             duration: m.duration,
             delay: m.delay,
             repeat: Infinity,
-            ease: "linear",
+            ease: [0.4, 0, 0.2, 1],
           }}
           style={{
             left: m.left,
@@ -41,6 +41,6 @@ export default function MeteorShower() {
           }}
         />
       ))}
-    </div>
+    </>
   );
 }
