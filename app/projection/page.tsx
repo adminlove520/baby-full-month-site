@@ -77,9 +77,9 @@ export default function Projection() {
       {/* Close Button */}
       <button 
         onClick={handleClose}
-        className="absolute top-8 right-8 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 z-[110]"
+        className="absolute top-8 right-8 p-4 bg-white/20 hover:bg-white/30 rounded-full text-white backdrop-blur-xl border border-white/40 shadow-2xl transition-all opacity-0 group-hover:opacity-100 z-[110] active:scale-95"
       >
-        <X size={32} />
+        <X size={28} />
       </button>
 
       <div className="absolute top-1/2 left-6 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">

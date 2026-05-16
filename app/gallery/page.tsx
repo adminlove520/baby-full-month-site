@@ -1,5 +1,6 @@
 import { getPhotos } from '@/lib/github';
 import GallerySection from '@/components/GallerySection';
+import Footer from '@/components/Footer';
 
 export default async function GalleryPage() {
   const photos = await getPhotos();
@@ -17,6 +18,8 @@ export default async function GalleryPage() {
           <p className="text-sm mt-2 opacity-60">请检查 Photos/张景皓 目录下是否有图片文件（支持 JPG, PNG, WEBP）。系统已尝试递归扫描所有子文件夹。</p>
         </div>
       )}
+      
+      {photos.length > 0 && <Footer />}
     </main>
   );
 }

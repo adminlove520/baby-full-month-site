@@ -1,6 +1,7 @@
 import GrowthClock from '@/components/GrowthClock';
 import GallerySection from '@/components/GallerySection';
 import ScrollButton from '@/components/ScrollButton';
+import Footer from '@/components/Footer';
 import { getPhotos } from '@/lib/github';
 
 export default async function Home() {
@@ -40,7 +41,7 @@ export default async function Home() {
       </div>
       
       {/* Footer / Empty State placeholder */}
-      {photos.length === 0 && (
+      {photos.length === 0 ? (
         <div className="text-center py-20 px-4">
           <div className="max-w-md mx-auto p-10 bg-white/30 backdrop-blur-md rounded-3xl border border-pink-100">
             <p className="text-pink-400">正在努力加载照片中...</p>
@@ -50,6 +51,8 @@ export default async function Home() {
             </p>
           </div>
         </div>
+      ) : (
+        <Footer />
       )}
     </div>
   );
