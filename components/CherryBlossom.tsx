@@ -1,49 +1,109 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export default function CherryBlossom() {
-  const [petals, setPetals] = useState<{ id: number; left: string; delay: number; duration: number; size: number; startRotate: number }[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const newPetals = Array.from({ length: 40 }).map((_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      delay: Math.random() * 20,
-      duration: Math.random() * 15 + 10,
-      size: Math.random() * 10 + 10,
-      startRotate: Math.random() * 360,
-    }));
-    setPetals(newPetals);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    const petals: Petal[] = [];
+    const petalCount = 40;
+
+    const sakuraImg = new Image();
+    // Using a base64 or a small drawing for the petal to ensure it works without external assets
+    // But for better look, I'll draw a realistic petal shape using arc and quadraticCurveTo
+
+    class Petal {
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      opacity: number;
+      flip: number;
+      xSpeed: number;
+      ySpeed: number;
+      flipSpeed: number;
+
+      constructor() {
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * canvas!.height - canvas!.height;
+        this.w = 10 + Math.random() * 15;
+        this.h = 10 + Math.random() * 10;
+        this.opacity = this.w / 25;
+        this.flip = Math.random();
+        this.xSpeed = 1.5 + Math.random() * 2;
+        this.ySpeed = 1 + Math.random() * 1.5;
+        this.flipSpeed = 0.01 + Math.random() * 0.03;
+      }
+
+      draw() {
+        if (this.y > canvas!.height || this.x > canvas!.width) {
+          this.x = -this.w;
+          this.y = Math.random() * canvas!.height;
+          this.xSpeed = 1.5 + Math.random() * 2;
+          this.ySpeed = 1 + Math.random() * 1.5;
+        }
+        ctx!.beginPath();
+        ctx!.fillStyle = `rgba(255, 192, 203, ${this.opacity})`;
+        ctx!.ellipse(
+          this.x,
+          this.y,
+          this.w * Math.abs(Math.cos(this.flip)),
+          this.h,
+          (this.flip * Math.PI) / 4,
+          0,
+          2 * Math.PI
+        );
+        ctx!.fill();
+      }
+
+      update() {
+        this.x += this.xSpeed;
+        this.y += this.ySpeed;
+        this.flip += this.flipSpeed;
+        this.draw();
+      }
+    }
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    const init = () => {
+      resize();
+      for (let i = 0; i < petalCount; i++) {
+        petals.push(new Petal());
+      }
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      petals.forEach((petal) => petal.update());
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    init();
+    animate();
+    window.addEventListener('resize', resize);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
   return (
-    <>
-      {petals.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute bg-pink-200/40 shadow-[0_0_8px_rgba(255,192,203,0.2)]"
-          initial={{ y: '-10%', x: p.left, rotate: p.startRotate, opacity: 0 }}
-          animate={{
-            y: '110vh',
-            x: [`${parseFloat(p.left)}%`, `${parseFloat(p.left) + 12}%`, `${parseFloat(p.left) - 6}%`, `${parseFloat(p.left)}%`],
-            rotate: p.startRotate + 1080,
-            opacity: [0, 1, 1, 0],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          style={{
-            width: p.size,
-            height: p.size * 0.7,
-            borderRadius: '50% 10% 50% 10% / 10% 50% 10% 50%',
-          }}
-        />
-      ))}
-    </>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ background: 'transparent' }}
+    />
   );
 }

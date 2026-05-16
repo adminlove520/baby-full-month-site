@@ -84,7 +84,7 @@ export default function GallerySection({ photos }: { photos: Photo[] }) {
   return (
     <section id="gallery" className="w-full max-w-7xl mx-auto py-24 px-4 perspective-1000">
       <h2 className="text-4xl md:text-7xl font-fancy text-center text-blue-500/80 mb-20 drop-shadow-lg tracking-wider">
-        3D 成长之旅
+        成长之旅
       </h2>
       
       <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-8 space-y-8">
