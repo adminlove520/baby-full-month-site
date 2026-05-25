@@ -86,8 +86,9 @@ export async function getMusic(): Promise<MusicFile[]> {
       .map((item: any) => ({
         name: item.name,
         path: item.path,
-        download_url: item.download_url,
+        download_url: `/api/proxy-image?path=${encodeURIComponent(item.path)}`,
       }));
+
   } catch (error) {
     return [];
   }
